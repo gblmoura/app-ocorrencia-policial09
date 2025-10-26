@@ -38,17 +38,16 @@ export default function InitialScreen({ navigation }) {
 const styles = StyleSheet.create({
   initialScreenBody: {
     flex: 1,
-    backgroundColor: "#121212", // Fundo escuro simples
+    backgroundColor: "#121212", 
     alignItems: "center",
     justifyContent: "center",
   },
-  // Estilos 'backgroundImage' e 'overlay' foram removidos.
 
   container: {
     textAlign: "center",
     maxWidth: 380,
-    width: width * 0.95, // 95% da largura da tela
-    backgroundColor: "#1e1e1e", // Fundo do card
+    width: width * 0.95, 
+    backgroundColor: "#1e1e1e", 
     borderRadius: 12,
     padding: 40,
     alignItems: "center",
@@ -58,7 +57,6 @@ const styles = StyleSheet.create({
     shadowRadius: 25,
     elevation: 10,
   },
-  // 💡 Novo estilo para o espaço do brasão
   brasaoPlaceholder: {
     fontSize: 50,
     color: "#007bff",
@@ -82,7 +80,7 @@ const styles = StyleSheet.create({
     marginTop: 15,
   },
   btnInitial: {
-    width: width * 0.6, // Largura ajustada
+    width: width * 0.6, 
     backgroundColor: "#007bff",
     paddingVertical: 13,
     paddingHorizontal: 60,
@@ -97,3 +95,4 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
   },
 });
+
