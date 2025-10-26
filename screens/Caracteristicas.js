@@ -8,7 +8,7 @@ import {
   TouchableOpacity,
   Image,
   Alert,
-  // 💡 NOVOS IMPORTS
+ 
   KeyboardAvoidingView,
   Platform,
   SafeAreaView,
@@ -22,7 +22,6 @@ export default function Caracteristicas({ navigation }) {
   const [imagem, setImagem] = useState(null);
 
   const selecionarImagem = async () => {
-    // Solicita permissão para acessar a galeria
     const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
     if (status !== "granted") {
       Alert.alert(
@@ -32,7 +31,7 @@ export default function Caracteristicas({ navigation }) {
       return;
     }
 
-    // Abre a galeria
+    
     const resultado = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ImagePicker.MediaTypeOptions.Images,
       allowsEditing: true,
@@ -62,12 +61,10 @@ export default function Caracteristicas({ navigation }) {
       return;
     }
 
-    // Aqui você pode enviar os dados para o backend ou limpar o formulário
     Alert.alert("Sucesso!", "Cadastro concluído com sucesso.");
   };
 
   return (
-    // 💡 ENVOLVIMENTO COM SAFEARIAVIEW e KEYBOARDAVOIDINGVIEW
     <SafeAreaView style={styles.fullScreen}>
       <KeyboardAvoidingView
         style={styles.fullScreen}
@@ -78,7 +75,7 @@ export default function Caracteristicas({ navigation }) {
           style={styles.scroll}
           contentContainerStyle={styles.contentContainer}
           showsVerticalScrollIndicator={false}
-          keyboardShouldPersistTaps="handled" // Mantém o teclado aberto ao tocar em outros inputs
+          keyboardShouldPersistTaps="handled" 
         >
           <Text style={styles.sectionTitle}>Características do Envolvido</Text>
 
@@ -122,7 +119,6 @@ export default function Caracteristicas({ navigation }) {
             <Image source={{ uri: imagem }} style={styles.imagePreview} />
           )}
 
-          {/* 💡 BOTÃO DENTRO DO SCROLLVIEW */}
           <TouchableOpacity style={styles.button} onPress={handleFinalizar}>
             <Text style={styles.buttonText}>Finalizar</Text>
           </TouchableOpacity>
@@ -134,11 +130,9 @@ export default function Caracteristicas({ navigation }) {
 
 const styles = StyleSheet.create({
   container: {
-    // O container não é mais o elemento raiz
     backgroundColor: "#000",
     flex: 1,
   },
-  // 💡 NOVO ESTILO: Garante que o SafeAreatView e o KAV ocupem todo o espaço
   fullScreen: {
     flex: 1,
     backgroundColor: "#000",
@@ -147,9 +141,7 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   contentContainer: {
-    // Este estilo afeta o CONTEÚDO DENTRO da ScrollView
     padding: 20,
-    // Padding extra no final para que o botão não fique colado na borda inferior
     paddingBottom: 50,
   },
   sectionTitle: {
@@ -173,7 +165,7 @@ const styles = StyleSheet.create({
     borderColor: "#222",
   },
   uploadButton: {
-    backgroundColor: "#002366", // Cor do seu botão 'Próximo'
+    backgroundColor: "#002366", 
     padding: 12,
     borderRadius: 8,
     alignItems: "center",
@@ -194,8 +186,8 @@ const styles = StyleSheet.create({
     padding: 15,
     borderRadius: 8,
     alignItems: "center",
-    marginTop: 20, // Espaço em cima para separar do último input
-    marginBottom: 20, // Espaço embaixo para a rolagem
+    marginTop: 20, 
+    marginBottom: 20, 
   },
   buttonText: {
     color: "#fff",
@@ -203,3 +195,4 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
   },
 });
+
