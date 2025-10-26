@@ -9,9 +9,6 @@ import {
   ScrollView,
   Dimensions,
 } from "react-native";
-// Recomenda-se usar 'react-native-vector-icons' para ícones reais
-// Aqui, usaremos um ícone de texto simples para simulação
-// import Icon from 'react-native-vector-icons/FontAwesome';
 
 const { width } = Dimensions.get("window");
 
@@ -57,9 +54,7 @@ export default function VehicleRegistrationScreen({ navigation }) {
         <View style={styles.container}>
           <Text style={styles.title}>VEÍCULO APREENDIDO</Text>
 
-          {/* Simulação do Ícone do Carro (Font Awesome fas fa-car) */}
           <Text style={styles.iconCar}>🚗</Text>
-          {/* Se estiver usando FontAwesome: <Icon name="car" size={40} color="#ffffff" style={styles.iconCar} /> */}
 
           <View style={styles.formGroup}>
             <TextInput
@@ -84,7 +79,6 @@ export default function VehicleRegistrationScreen({ navigation }) {
             />
           </View>
 
-          {/* Checkbox em React Native */}
           <TouchableOpacity
             style={styles.checkboxGroup}
             onPress={handleCheckboxToggle}
@@ -138,7 +132,7 @@ export default function VehicleRegistrationScreen({ navigation }) {
             <Text style={styles.linkText}>
               <Text
                 style={styles.linkAnchor}
-                onPress={() => console.log("Navegar para Início")} // navigation.navigate('Index')
+                onPress={() => console.log("Navegar para Início")} 
               >
                 Voltar para a Tela Inicial
               </Text>
@@ -183,7 +177,7 @@ const styles = StyleSheet.create({
     textAlign: "center",
   },
   iconCar: {
-    fontSize: 40, // Equivalente a 2.5em
+    fontSize: 40, 
     color: "#ffffff",
     marginBottom: 20,
   },
@@ -200,13 +194,13 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     color: "#f0f0f0",
     fontSize: 15,
-    // Efeitos de foco (focus) precisam ser tratados com useState no RN
+  
   },
   inputDisabled: {
     backgroundColor: "#1a1a1a",
     color: "#555555",
   },
-  // Estilos do Checkbox
+  
   checkboxGroup: {
     flexDirection: "row",
     alignSelf: "flex-start",
@@ -237,7 +231,7 @@ const styles = StyleSheet.create({
     color: "#f0f0f0",
     fontSize: 15,
   },
-  // Estilos do Botão
+ 
   btn: {
     width: "100%",
     backgroundColor: "#007bff",
@@ -252,7 +246,7 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: "bold",
   },
-  // Estilos de Link
+  
   link: {
     alignItems: "center",
   },
@@ -266,3 +260,4 @@ const styles = StyleSheet.create({
     textDecorationLine: "underline",
   },
 });
+
