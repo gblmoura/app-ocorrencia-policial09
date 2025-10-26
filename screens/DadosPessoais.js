@@ -49,7 +49,6 @@ export default function Cadastro({ navigation }) {
         >
           <Text style={styles.sectionTitle}>Cadastro</Text>
 
-          {/* CAMPOS DO FORMULÁRIO */}
 
           <Text style={styles.label}>Tipo de Envolvido*</Text>
           <View style={styles.pickerContainer}>
@@ -178,10 +177,7 @@ export default function Cadastro({ navigation }) {
           <TouchableOpacity style={styles.button} onPress={handleNext}>
             <Text style={styles.buttonText}>Próximo</Text>
           </TouchableOpacity>
-          {/* FIM: Botão dentro do ScrollView */}
         </ScrollView>
-
-        {/* REMOVIDO: O View style={styles.fixedButtonContainer} foi removido daqui */}
       </KeyboardAvoidingView>
     </SafeAreaView>
   );
@@ -201,7 +197,6 @@ const styles = StyleSheet.create({
   },
   scrollContent: {
     paddingTop: 20,
-    // 💡 AJUSTE: Padding reduzido, pois o botão não é mais fixo.
     paddingBottom: 40,
   },
   sectionTitle: {
@@ -238,17 +233,15 @@ const styles = StyleSheet.create({
     backgroundColor: "#111",
     fontSize: 16,
   },
-  // 💡 REMOVIDO: fixedButtonContainer foi removido
 
   button: {
-    // 💡 AJUSTE: Adicionando margens para separar o botão dos outros elementos
     backgroundColor: "#002366",
     padding: 15,
     borderRadius: 8,
     width: "100%",
     alignItems: "center",
-    marginTop: 25, // Espaço acima
-    marginBottom: 15, // Espaço abaixo para rolar
+    marginTop: 25,
+    marginBottom: 15, 
   },
   buttonText: {
     color: "#fff",
@@ -256,3 +249,4 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
   },
 });
+
