@@ -88,7 +88,6 @@ export default function Endereco({ navigation }) {
           placeholderTextColor="#999"
         />
 
-        {/* Espaço ajustado para o botão */}
         <View style={{ height: 100 }} />
       </ScrollView>
 
@@ -156,3 +155,4 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
   },
 });
+
