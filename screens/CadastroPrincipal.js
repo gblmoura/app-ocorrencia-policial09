@@ -8,7 +8,6 @@ import {
   Alert,
   ScrollView,
   Dimensions,
-  // 💡 NOVOS IMPORTS: KeyboardAvoidingView e Platform
   KeyboardAvoidingView,
   Platform,
 } from "react-native";
@@ -24,34 +23,26 @@ export default function CadastroPrincipal({ navigation }) {
   const [senha, setSenha] = useState("");
 
   const handleRegister = () => {
-    // 1. Validação (Impede o avanço se os campos estiverem vazios)
     if (!nome || !matricula || !cargo || !unidade || !email || !senha) {
       Alert.alert("Erro", "Por favor, preencha todos os campos obrigatórios.");
       return;
     }
 
-    // Navega para a tela de Menu/Boas-vindas
     navigation.navigate("MenuPrincipal");
   };
 
   return (
-    // 💡 CORREÇÃO APLICADA: Envolvemos o conteúdo com KeyboardAvoidingView.
-    // O 'behavior' é ajustado para funcionar corretamente em iOS e Android.
     <KeyboardAvoidingView
       behavior={Platform.OS === "ios" ? "padding" : "height"}
       style={styles.body}
-      // O offset pode ser ajustado para garantir que não fique escondido sob a barra de navegação.
       keyboardVerticalOffset={Platform.OS === "ios" ? 80 : 0}
     >
       <ScrollView
         contentContainerStyle={styles.scrollContent}
-        // Desativa o scroll vertical para evitar comportamentos inesperados do iOS, deixando a rolagem apenas para o KeyboardAvoidingView (opcional, mas recomendado)
-        // scrollEnabled={false}
       >
         <View style={styles.container}>
           <Text style={styles.title}>CADASTRO</Text>
 
-          {/* ... Todos os campos de TextInput ... */}
           <View style={styles.formGroup}>
             <TextInput
               style={styles.input}
@@ -115,7 +106,6 @@ export default function CadastroPrincipal({ navigation }) {
               secureTextEntry={true}
             />
           </View>
-          {/* ... Fim dos campos de TextInput ... */}
 
           <TouchableOpacity
             style={styles.btn}
@@ -142,10 +132,9 @@ export default function CadastroPrincipal({ navigation }) {
   );
 }
 
-// ... Estilos (mantidos inalterados) ...
 const styles = StyleSheet.create({
   body: {
-    flex: 1, // Essencial para o KeyboardAvoidingView
+    flex: 1,
     backgroundColor: "#121212",
   },
   scrollContent: {
@@ -154,7 +143,6 @@ const styles = StyleSheet.create({
     alignItems: "center",
     paddingVertical: 40,
   },
-  // ... (restante dos estilos)
   container: {
     maxWidth: 380,
     width: width * 0.95,
@@ -215,3 +203,4 @@ const styles = StyleSheet.create({
     textDecorationLine: "underline",
   },
 });
+
