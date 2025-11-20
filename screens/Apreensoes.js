@@ -14,6 +14,74 @@ import {
 import { Picker } from "@react-native-picker/picker";
 import { FontAwesome } from "@expo/vector-icons";
 
+const COLORS = {
+  BACKGROUND: "#FFFFFF",
+  TEXT: "#000000",
+  SUB_TEXT: "#777777",
+  CARD: "#F0F0F0",
+  BORDER: "#DDDDDD",
+  PRIMARY: "#002366",
+  ACCENT: "#007bff",
+  DANGER: "#ff4444",
+  EMPTY: "#AAAAAA",
+};
+
+const gerarTokenRelatorio = () => {
+  const date = new Date();
+  const timestampPart = date.getTime().toString().slice(-6);
+  const randomPart = Math.floor(100 + Math.random() * 900);
+  return `NU-${timestampPart}-${randomPart}`;
+};
+
+const ExpandableCard = ({ title, showExpandToggle, children }) => {
+  const [isExpanded, setIsExpanded] = useState(
+    showExpandToggle === false ? true : false
+  );
+
+  const toggleExpand = () => {
+    if (!showExpandToggle) return;
+    setIsExpanded(!isExpanded);
+  };
+  const renderContent = () => (
+    <View style={styles.itemCardContent}>
+           {" "}
+      {isExpanded ? (
+        children
+      ) : (
+        <Text style={{ color: COLORS.EMPTY, fontStyle: "italic" }}>
+                    Toque para expandir e editar.        {" "}
+        </Text>
+      )}
+         {" "}
+    </View>
+  );
+
+  return (
+    <TouchableOpacity
+      style={styles.itemCard}
+      onPress={toggleExpand}
+      disabled={!showExpandToggle}
+      activeOpacity={showExpandToggle ? 0.7 : 1}
+    >
+           {" "}
+      <View style={styles.itemCardHeader}>
+                <Text style={styles.itemTitle}>{title}</Text>       {" "}
+        {showExpandToggle && (
+          <FontAwesome
+            name={isExpanded ? "chevron-up" : "chevron-down"}
+            size={16}
+            color={COLORS.ACCENT}
+            style={{ paddingLeft: 10 }}
+          />
+        )}
+             {" "}
+      </View>
+            {showExpandToggle ? isExpanded && renderContent() : renderContent()}
+         {" "}
+    </TouchableOpacity>
+  );
+};
+
 const tiposArma = [
   "Pistola",
   "Revólver",
@@ -88,13 +156,14 @@ const novoVeiculo = (id) => ({
 const novoPolicial = (id) => ({
   id,
   matricula: "",
-  nome: "",
+  nome: "", 
   funcao: "",
 });
 
-export default function Apreencoes({ navigation }) {
-  // Estados existentes
-  const [armas, setArmas] = useState([novaArma(1)]);
+export default function Apreensoes({ navigation, route }) {
+  const dadosAnteriores = route.params || {};
+
+  const [armas, setArmas] = useState([]);
   const [municoes, setMunicoes] = useState([]);
   const [drogas, setDrogas] = useState([]);
   const [dinheiro, setDinheiro] = useState([]);
@@ -102,23 +171,13 @@ export default function Apreencoes({ navigation }) {
   const [objetos, setObjetos] = useState([]);
   const [veiculos, setVeiculos] = useState([]);
   const [policiais, setPoliciais] = useState([]);
-  const [historico, setHistorico] = useState("");
 
-  let nextArmaId = armas.length > 0 ? armas[armas.length - 1].id + 1 : 1;
-  let nextMunicaoId =
-    municoes.length > 0 ? municoes[municoes.length - 1].id + 1 : 1;
-  let nextDrogaId = drogas.length > 0 ? drogas[drogas.length - 1].id + 1 : 1;
-  let nextDinheiroId =
-    dinheiro.length > 0 ? dinheiro[dinheiro.length - 1].id + 1 : 1;
-  let nextObjetoId =
-    objetos.length > 0 ? objetos[objetos.length - 1].id + 1 : 1;
-  let nextVeiculoId =
-    veiculos.length > 0 ? veiculos[veiculos.length - 1].id + 1 : 1;
-  let nextPolicialId =
-    policiais.length > 0 ? policiais[policiais.length - 1].id + 1 : 1;
+  const [tokenRelatorio, setTokenRelatorio] = useState("");
+
+  const getNextId = (arr) => (arr.length > 0 ? arr[arr.length - 1].id + 1 : 1); 
 
   const handleAddArma = () => {
-    setArmas([...armas, novaArma(nextArmaId++)]);
+    setArmas([...armas, novaArma(getNextId(armas))]);
   };
   const handleRemoveArma = (id) => {
     setArmas(armas.filter((arma) => arma.id !== id));
@@ -129,7 +188,7 @@ export default function Apreencoes({ navigation }) {
     );
   };
   const handleAddMunicao = () => {
-    setMunicoes([...municoes, novaMunicao(nextMunicaoId++)]);
+    setMunicoes([...municoes, novaMunicao(getNextId(municoes))]);
   };
   const handleRemoveMunicao = (id) => {
     setMunicoes(municoes.filter((municao) => municao.id !== id));
@@ -142,7 +201,7 @@ export default function Apreencoes({ navigation }) {
     );
   };
   const handleAddDroga = () => {
-    setDrogas([...drogas, novaDroga(nextDrogaId++)]);
+    setDrogas([...drogas, novaDroga(getNextId(drogas))]);
   };
   const handleRemoveDroga = (id) => {
     setDrogas(drogas.filter((droga) => droga.id !== id));
@@ -155,7 +214,7 @@ export default function Apreencoes({ navigation }) {
     );
   };
   const handleAddDinheiro = () => {
-    setDinheiro([...dinheiro, novoDinheiro(nextDinheiroId++)]);
+    setDinheiro([...dinheiro, novoDinheiro(getNextId(dinheiro))]);
   };
   const handleRemoveDinheiro = (id) => {
     setDinheiro(dinheiro.filter((item) => item.id !== id));
@@ -167,9 +226,8 @@ export default function Apreencoes({ navigation }) {
       )
     );
   };
-
   const handleAddObjeto = () => {
-    setObjetos([...objetos, novoObjeto(nextObjetoId++)]);
+    setObjetos([...objetos, novoObjeto(getNextId(objetos))]);
   };
   const handleRemoveObjeto = (id) => {
     setObjetos(objetos.filter((objeto) => objeto.id !== id));
@@ -181,9 +239,8 @@ export default function Apreencoes({ navigation }) {
       )
     );
   };
-
   const handleAddVeiculo = () => {
-    setVeiculos([...veiculos, novoVeiculo(nextVeiculoId++)]);
+    setVeiculos([...veiculos, novoVeiculo(getNextId(veiculos))]);
   };
   const handleRemoveVeiculo = (id) => {
     setVeiculos(veiculos.filter((veiculo) => veiculo.id !== id));
@@ -195,9 +252,8 @@ export default function Apreencoes({ navigation }) {
       )
     );
   };
-
   const handleAddPolicial = () => {
-    setPoliciais([...policiais, novoPolicial(nextPolicialId++)]);
+    setPoliciais([...policiais, novoPolicial(getNextId(policiais))]);
   };
   const handleRemovePolicial = (id) => {
     setPoliciais(policiais.filter((policial) => policial.id !== id));
@@ -208,30 +264,55 @@ export default function Apreencoes({ navigation }) {
         policial.id === id ? { ...policial, [field]: value } : policial
       )
     );
-  };
+  }; 
 
   const handleNext = () => {
-    Alert.alert("Sucesso", "Dados de Apreensões validados.");
-  };
+    const novoToken = gerarTokenRelatorio();
+    setTokenRelatorio(novoToken); 
 
-  const ArmaDeFogoForm = ({ arma }) => (
-    <View style={styles.itemCard}>
-           {" "}
-      <Text style={styles.itemTitle}>
-                Arma #{armas.findIndex((a) => a.id === arma.id) + 1}     {" "}
-      </Text>
+    const dadosDestaTela = {
+      armas,
+      municoes,
+      drogas,
+      dinheiro,
+      objetos,
+      veiculos,
+      policiais, 
+      historico: "",
+      tokenRelatorio: novoToken,
+    }; 
+
+    const todosOsDadosAcumulados = {
+      ...dadosAnteriores,
+      apreensoes: dadosDestaTela,
+    }; 
+
+    console.log("Fluxo de coleta concluído. Navegando para RelatorioFinal.");
+    navigation.navigate("RelatorioFinal", todosOsDadosAcumulados);
+  }; 
+  const ArmaDeFogoForm = ({ arma, showExpandToggle }) => (
+    <ExpandableCard
+      title={`Arma #${armas.findIndex((a) => a.id === arma.id) + 1} (${
+        arma.tipo || "Não Informado"
+      })`}
+      showExpandToggle={showExpandToggle}
+    >
             <Text style={styles.label}>Tipo da Arma *</Text>     {" "}
       <View style={styles.pickerContainer}>
                {" "}
         <Picker
           selectedValue={arma.tipo}
           onValueChange={(v) => handleUpdateArma(arma.id, "tipo", v)}
-          dropdownIconColor="#fff"
+          dropdownIconColor={COLORS.SUB_TEXT}
           style={styles.pickerBase}
         >
                    {" "}
-          <Picker.Item label="Selecione o Tipo..." value="" color="#999" />     
-             {" "}
+          <Picker.Item
+            label="Selecione o Tipo..."
+            value=""
+            color={COLORS.SUB_TEXT}
+          />
+                   {" "}
           {tiposArma.map((t, i) => (
             <Picker.Item key={i} label={t} value={t} />
           ))}
@@ -245,12 +326,16 @@ export default function Apreencoes({ navigation }) {
         <Picker
           selectedValue={arma.calibre}
           onValueChange={(v) => handleUpdateArma(arma.id, "calibre", v)}
-          dropdownIconColor="#fff"
+          dropdownIconColor={COLORS.SUB_TEXT}
           style={styles.pickerBase}
         >
                    {" "}
-          <Picker.Item label="Selecione o Calibre..." value="" color="#999" /> 
-                 {" "}
+          <Picker.Item
+            label="Selecione o Calibre..."
+            value=""
+            color={COLORS.SUB_TEXT}
+          />
+                   {" "}
           {calibres.map((c, i) => (
             <Picker.Item key={i} label={c} value={c} />
           ))}
@@ -262,43 +347,50 @@ export default function Apreencoes({ navigation }) {
       <TextInput
         style={styles.input}
         placeholder="Nº de Série ou Identificação"
-        placeholderTextColor="#999"
+        placeholderTextColor={COLORS.SUB_TEXT}
         value={arma.serie}
         onChangeText={(v) => handleUpdateArma(arma.id, "serie", v)}
       />
            {" "}
-      {armas.length > 1 && (
+      {armas.length >= 1 && (
         <TouchableOpacity
           style={styles.removeButton}
           onPress={() => handleRemoveArma(arma.id)}
         >
-                    <FontAwesome name="trash-o" size={18} color="#ff4444" />   
-                <Text style={styles.removeButtonText}>Remover Arma</Text>       {" "}
+                   {" "}
+          <FontAwesome name="trash-o" size={18} color={COLORS.DANGER} />       
+            <Text style={styles.removeButtonText}>Remover Arma</Text>       {" "}
         </TouchableOpacity>
       )}
          {" "}
-    </View>
+    </ExpandableCard>
   );
 
-  const MunicaoForm = ({ municao }) => (
-    <View style={styles.itemCard}>
-           {" "}
-      <Text style={styles.itemTitle}>
-                Munição #{municoes.findIndex((m) => m.id === municao.id) + 1}   
-         {" "}
-      </Text>
+  const MunicaoForm = ({ municao, showExpandToggle }) => (
+    <ExpandableCard
+      title={`Munição #${municoes.findIndex((m) => m.id === municao.id) + 1} (${
+        municao.quantidade && municao.tipo
+          ? `${municao.quantidade}x ${municao.tipo}`
+          : "Não Informado"
+      })`}
+      showExpandToggle={showExpandToggle}
+    >
             <Text style={styles.label}>Tipo (Calibre) *</Text>     {" "}
       <View style={styles.pickerContainer}>
                {" "}
         <Picker
           selectedValue={municao.tipo}
           onValueChange={(v) => handleUpdateMunicao(municao.id, "tipo", v)}
-          dropdownIconColor="#fff"
+          dropdownIconColor={COLORS.SUB_TEXT}
           style={styles.pickerBase}
         >
                    {" "}
-          <Picker.Item label="Selecione o Tipo..." value="" color="#999" />     
-             {" "}
+          <Picker.Item
+            label="Selecione o Tipo..."
+            value=""
+            color={COLORS.SUB_TEXT}
+          />
+                   {" "}
           {tiposMunicao.map((t, i) => (
             <Picker.Item key={i} label={t} value={t} />
           ))}
@@ -310,7 +402,7 @@ export default function Apreencoes({ navigation }) {
       <TextInput
         style={styles.input}
         placeholder="Quantidade (apenas números)"
-        placeholderTextColor="#999"
+        placeholderTextColor={COLORS.SUB_TEXT}
         value={municao.quantidade}
         onChangeText={(v) => handleUpdateMunicao(municao.id, "quantidade", v)}
         keyboardType="numeric"
@@ -319,7 +411,7 @@ export default function Apreencoes({ navigation }) {
       <TextInput
         style={[styles.input, { height: 80, textAlignVertical: "top" }]}
         placeholder="Detalhes sobre a apreensão (opcional)"
-        placeholderTextColor="#999"
+        placeholderTextColor={COLORS.SUB_TEXT}
         multiline
         value={municao.infoApreensao}
         onChangeText={(v) =>
@@ -327,38 +419,45 @@ export default function Apreencoes({ navigation }) {
         }
       />
            {" "}
-      {municoes.length > 0 && (
+      {municoes.length >= 1 && (
         <TouchableOpacity
           style={styles.removeButton}
           onPress={() => handleRemoveMunicao(municao.id)}
         >
-                    <FontAwesome name="trash-o" size={18} color="#ff4444" />   
-                <Text style={styles.removeButtonText}>Remover Munição</Text>   
-             {" "}
+                   {" "}
+          <FontAwesome name="trash-o" size={18} color={COLORS.DANGER} />       
+            <Text style={styles.removeButtonText}>Remover Munição</Text>       {" "}
         </TouchableOpacity>
       )}
          {" "}
-    </View>
+    </ExpandableCard>
   );
 
-  const DrogaForm = ({ droga }) => (
-    <View style={styles.itemCard}>
-           {" "}
-      <Text style={styles.itemTitle}>
-                Droga #{drogas.findIndex((d) => d.id === droga.id) + 1}     {" "}
-      </Text>
+  const DrogaForm = ({ droga, showExpandToggle }) => (
+    <ExpandableCard
+      title={`Droga #${drogas.findIndex((d) => d.id === droga.id) + 1} (${
+        droga.quantidade && droga.unidade
+          ? `${droga.quantidade} ${droga.unidade}`
+          : "Não Informado"
+      })`}
+      showExpandToggle={showExpandToggle}
+    >
             <Text style={styles.label}>Tipo *</Text>     {" "}
       <View style={styles.pickerContainer}>
                {" "}
         <Picker
           selectedValue={droga.tipo}
           onValueChange={(v) => handleUpdateDroga(droga.id, "tipo", v)}
-          dropdownIconColor="#fff"
+          dropdownIconColor={COLORS.SUB_TEXT}
           style={styles.pickerBase}
         >
                    {" "}
-          <Picker.Item label="Selecione o Tipo..." value="" color="#999" />     
-             {" "}
+          <Picker.Item
+            label="Selecione o Tipo..."
+            value=""
+            color={COLORS.SUB_TEXT}
+          />
+                   {" "}
           {tiposDroga.map((t, i) => (
             <Picker.Item key={i} label={t} value={t} />
           ))}
@@ -372,7 +471,7 @@ export default function Apreencoes({ navigation }) {
       <TextInput
         style={styles.input}
         placeholder="Apresentação da droga"
-        placeholderTextColor="#999"
+        placeholderTextColor={COLORS.SUB_TEXT}
         value={droga.apresentacao}
         onChangeText={(v) => handleUpdateDroga(droga.id, "apresentacao", v)}
       />
@@ -384,7 +483,7 @@ export default function Apreencoes({ navigation }) {
           <TextInput
             style={styles.inputInline}
             placeholder="Qtd."
-            placeholderTextColor="#999"
+            placeholderTextColor={COLORS.SUB_TEXT}
             value={droga.quantidade}
             onChangeText={(v) => handleUpdateDroga(droga.id, "quantidade", v)}
             keyboardType="numeric"
@@ -399,11 +498,12 @@ export default function Apreencoes({ navigation }) {
             <Picker
               selectedValue={droga.unidade}
               onValueChange={(v) => handleUpdateDroga(droga.id, "unidade", v)}
-              dropdownIconColor="#fff"
+              dropdownIconColor={COLORS.SUB_TEXT}
               style={styles.pickerBase}
             >
                            {" "}
-              <Picker.Item label="Unidade" value="" color="#999" />             {" "}
+              <Picker.Item label="Unidade" value="" color={COLORS.SUB_TEXT} /> 
+                         {" "}
               {unidadesMedida.map((u, i) => (
                 <Picker.Item key={i} label={u} value={u.split(" ")[0]} />
               ))}
@@ -419,37 +519,37 @@ export default function Apreencoes({ navigation }) {
       <TextInput
         style={styles.input}
         placeholder="Tipo de embalagem (Ex.: saco plástico, papel alumínio)"
-        placeholderTextColor="#999"
+        placeholderTextColor={COLORS.SUB_TEXT}
         value={droga.embalagem}
         onChangeText={(v) => handleUpdateDroga(droga.id, "embalagem", v)}
       />
            {" "}
-      {drogas.length > 0 && (
+      {drogas.length >= 1 && (
         <TouchableOpacity
           style={styles.removeButton}
           onPress={() => handleRemoveDroga(droga.id)}
         >
-                    <FontAwesome name="trash-o" size={18} color="#ff4444" />   
-                <Text style={styles.removeButtonText}>Remover Droga</Text>     
-           {" "}
+                   {" "}
+          <FontAwesome name="trash-o" size={18} color={COLORS.DANGER} />       
+            <Text style={styles.removeButtonText}>Remover Droga</Text>       {" "}
         </TouchableOpacity>
       )}
          {" "}
-    </View>
+    </ExpandableCard>
   );
 
-  const DinheiroForm = ({ item }) => (
-    <View style={styles.itemCard}>
-           {" "}
-      <Text style={styles.itemTitle}>
-                Dinheiro Apreendido #
-        {dinheiro.findIndex((d) => d.id === item.id) + 1}     {" "}
-      </Text>
+  const DinheiroForm = ({ item, showExpandToggle }) => (
+    <ExpandableCard
+      title={`Dinheiro Apreendido #${
+        dinheiro.findIndex((d) => d.id === item.id) + 1
+      } (${item.valor ? `R$ ${item.valor}` : "Não Informado"})`}
+      showExpandToggle={showExpandToggle}
+    >
             <Text style={styles.label}>Valor Total (R$) *</Text>     {" "}
       <TextInput
         style={styles.input}
         placeholder="R$ 0,00"
-        placeholderTextColor="#999"
+        placeholderTextColor={COLORS.SUB_TEXT}
         value={item.valor}
         onChangeText={(v) => handleUpdateDinheiro(item.id, "valor", v)}
         keyboardType="numeric"
@@ -458,36 +558,38 @@ export default function Apreencoes({ navigation }) {
       <TextInput
         style={[styles.input, { height: 80, textAlignVertical: "top" }]}
         placeholder="Ex.: Discriminação de cédulas, origem do dinheiro"
-        placeholderTextColor="#999"
+        placeholderTextColor={COLORS.SUB_TEXT}
         multiline
         value={item.observacoes}
         onChangeText={(v) => handleUpdateDinheiro(item.id, "observacoes", v)}
       />
            {" "}
-      {dinheiro.length > 0 && (
+      {dinheiro.length >= 1 && (
         <TouchableOpacity
           style={styles.removeButton}
           onPress={() => handleRemoveDinheiro(item.id)}
         >
-                    <FontAwesome name="trash-o" size={18} color="#ff4444" />   
-                <Text style={styles.removeButtonText}>Remover Item</Text>       {" "}
+                   {" "}
+          <FontAwesome name="trash-o" size={18} color={COLORS.DANGER} />       
+            <Text style={styles.removeButtonText}>Remover Item</Text>       {" "}
         </TouchableOpacity>
       )}
          {" "}
-    </View>
+    </ExpandableCard>
   );
 
-  const ObjetoForm = ({ objeto }) => (
-    <View style={styles.itemCard}>
-           {" "}
-      <Text style={styles.itemTitle}>
-                Objeto #{objetos.findIndex((o) => o.id === objeto.id) + 1}     {" "}
-      </Text>
+  const ObjetoForm = ({ objeto, showExpandToggle }) => (
+    <ExpandableCard
+      title={`Objeto #${objetos.findIndex((o) => o.id === objeto.id) + 1} (${
+        objeto.descricao || "Não Informado"
+      })`}
+      showExpandToggle={showExpandToggle}
+    >
             <Text style={styles.label}>Descrição *</Text>     {" "}
       <TextInput
         style={[styles.input, { height: 80, textAlignVertical: "top" }]}
         placeholder="Ex.: Telefone celular, notebook, jóias, documento"
-        placeholderTextColor="#999"
+        placeholderTextColor={COLORS.SUB_TEXT}
         multiline
         value={objeto.descricao}
         onChangeText={(v) => handleUpdateObjeto(objeto.id, "descricao", v)}
@@ -496,19 +598,19 @@ export default function Apreencoes({ navigation }) {
       <TextInput
         style={styles.input}
         placeholder="Ex.: Apple iPhone 13, Samsung Galaxy S21"
-        placeholderTextColor="#999"
+        placeholderTextColor={COLORS.SUB_TEXT}
         value={objeto.marcaModelo}
         onChangeText={(v) => handleUpdateObjeto(objeto.id, "marcaModelo", v)}
       />
            {" "}
       <Text style={styles.label}>
-        Identificador (Ex.: IMEI/Serial) (Opcional)
+                Identificador (Ex.: IMEI/Serial) (Opcional)      {" "}
       </Text>
            {" "}
       <TextInput
         style={styles.input}
         placeholder="IMEI, número de série, etc."
-        placeholderTextColor="#999"
+        placeholderTextColor={COLORS.SUB_TEXT}
         value={objeto.identificador}
         onChangeText={(v) => handleUpdateObjeto(objeto.id, "identificador", v)}
       />
@@ -518,12 +620,16 @@ export default function Apreencoes({ navigation }) {
         <Picker
           selectedValue={objeto.situacao}
           onValueChange={(v) => handleUpdateObjeto(objeto.id, "situacao", v)}
-          dropdownIconColor="#fff"
+          dropdownIconColor={COLORS.SUB_TEXT}
           style={styles.pickerBase}
         >
                    {" "}
-          <Picker.Item label="Selecione a Situação..." value="" color="#999" /> 
-                 {" "}
+          <Picker.Item
+            label="Selecione a Situação..."
+            value=""
+            color={COLORS.SUB_TEXT}
+          />
+                   {" "}
           {situacoesObjeto.map((s, i) => (
             <Picker.Item key={i} label={s} value={s} />
           ))}
@@ -532,39 +638,43 @@ export default function Apreencoes({ navigation }) {
              {" "}
       </View>
            {" "}
-      {objetos.length > 0 && (
+      {objetos.length >= 1 && (
         <TouchableOpacity
           style={styles.removeButton}
           onPress={() => handleRemoveObjeto(objeto.id)}
         >
-                    <FontAwesome name="trash-o" size={18} color="#ff4444" />   
-                <Text style={styles.removeButtonText}>Remover Objeto</Text>     
-           {" "}
+                   {" "}
+          <FontAwesome name="trash-o" size={18} color={COLORS.DANGER} />       
+            <Text style={styles.removeButtonText}>Remover Objeto</Text>       {" "}
         </TouchableOpacity>
       )}
          {" "}
-    </View>
+    </ExpandableCard>
   );
 
-  const VeiculoForm = ({ veiculo }) => (
-    <View style={styles.itemCard}>
-           {" "}
-      <Text style={styles.itemTitle}>
-                Veículo #{veiculos.findIndex((v) => v.id === veiculo.id) + 1}   
-         {" "}
-      </Text>
+  const VeiculoForm = ({ veiculo, showExpandToggle }) => (
+    <ExpandableCard
+      title={`Veículo #${veiculos.findIndex((v) => v.id === veiculo.id) + 1} (${
+        veiculo.placa || "Não Informado"
+      })`}
+      showExpandToggle={showExpandToggle}
+    >
             <Text style={styles.label}>Tipo *</Text>     {" "}
       <View style={styles.pickerContainer}>
                {" "}
         <Picker
           selectedValue={veiculo.tipo}
           onValueChange={(v) => handleUpdateVeiculo(veiculo.id, "tipo", v)}
-          dropdownIconColor="#fff"
+          dropdownIconColor={COLORS.SUB_TEXT}
           style={styles.pickerBase}
         >
                    {" "}
-          <Picker.Item label="Selecione o Tipo..." value="" color="#999" />     
-             {" "}
+          <Picker.Item
+            label="Selecione o Tipo..."
+            value=""
+            color={COLORS.SUB_TEXT}
+          />
+                   {" "}
           {tiposVeiculo.map((t, i) => (
             <Picker.Item key={i} label={t} value={t} />
           ))}
@@ -576,7 +686,7 @@ export default function Apreencoes({ navigation }) {
       <TextInput
         style={styles.input}
         placeholder="Placa ou 'SEM PLACA'"
-        placeholderTextColor="#999"
+        placeholderTextColor={COLORS.SUB_TEXT}
         value={veiculo.placa}
         onChangeText={(v) => handleUpdateVeiculo(veiculo.id, "placa", v)}
         autoCapitalize="characters"
@@ -585,7 +695,7 @@ export default function Apreencoes({ navigation }) {
       <TextInput
         style={styles.input}
         placeholder="Marca/Modelo (Ex.: Fiat Uno, Honda CG 160)"
-        placeholderTextColor="#999"
+        placeholderTextColor={COLORS.SUB_TEXT}
         value={veiculo.marcaModelo}
         onChangeText={(v) => handleUpdateVeiculo(veiculo.id, "marcaModelo", v)}
       />
@@ -597,7 +707,7 @@ export default function Apreencoes({ navigation }) {
           <TextInput
             style={styles.inputInline}
             placeholder="Cor"
-            placeholderTextColor="#999"
+            placeholderTextColor={COLORS.SUB_TEXT}
             value={veiculo.cor}
             onChangeText={(v) => handleUpdateVeiculo(veiculo.id, "cor", v)}
           />
@@ -609,7 +719,7 @@ export default function Apreencoes({ navigation }) {
           <TextInput
             style={styles.inputInline}
             placeholder="Nº do Chassi"
-            placeholderTextColor="#999"
+            placeholderTextColor={COLORS.SUB_TEXT}
             value={veiculo.chassi}
             onChangeText={(v) => handleUpdateVeiculo(veiculo.id, "chassi", v)}
           />
@@ -618,41 +728,42 @@ export default function Apreencoes({ navigation }) {
              {" "}
       </View>
            {" "}
-      {veiculos.length > 0 && (
+      {veiculos.length >= 1 && (
         <TouchableOpacity
           style={styles.removeButton}
           onPress={() => handleRemoveVeiculo(veiculo.id)}
         >
-                    <FontAwesome name="trash-o" size={18} color="#ff4444" />   
-                <Text style={styles.removeButtonText}>Remover Veículo</Text>   
-             {" "}
+                   {" "}
+          <FontAwesome name="trash-o" size={18} color={COLORS.DANGER} />       
+            <Text style={styles.removeButtonText}>Remover Veículo</Text>       {" "}
         </TouchableOpacity>
       )}
          {" "}
-    </View>
+    </ExpandableCard>
   );
 
-  const PolicialForm = ({ policial }) => (
-    <View style={styles.itemCard}>
-           {" "}
-      <Text style={styles.itemTitle}>
-                Policial #{policiais.findIndex((p) => p.id === policial.id) + 1}
-             {" "}
-      </Text>
+  const PolicialForm = ({ policial, showExpandToggle }) => (
+    <ExpandableCard
+      title={`Policial #${
+        policiais.findIndex((p) => p.id === policial.id) + 1
+      } (${policial.nome || "Não Informado"})`}
+      showExpandToggle={showExpandToggle}
+    >
             <Text style={styles.label}>Matrícula *</Text>     {" "}
       <TextInput
         style={styles.input}
         placeholder="Matrícula"
-        placeholderTextColor="#999"
+        placeholderTextColor={COLORS.SUB_TEXT}
         value={policial.matricula}
         onChangeText={(v) => handleUpdatePolicial(policial.id, "matricula", v)}
         keyboardType="numeric"
       />
-            <Text style={styles.label}>Nome *</Text>     {" "}
+           {" "}
+          <Text style={styles.label}>Nome Completo *</Text>     {" "}
       <TextInput
         style={styles.input}
         placeholder="Nome Completo"
-        placeholderTextColor="#999"
+        placeholderTextColor={COLORS.SUB_TEXT}
         value={policial.nome}
         onChangeText={(v) => handleUpdatePolicial(policial.id, "nome", v)}
       />
@@ -662,12 +773,16 @@ export default function Apreencoes({ navigation }) {
         <Picker
           selectedValue={policial.funcao}
           onValueChange={(v) => handleUpdatePolicial(policial.id, "funcao", v)}
-          dropdownIconColor="#fff"
+          dropdownIconColor={COLORS.SUB_TEXT}
           style={styles.pickerBase}
         >
                    {" "}
-          <Picker.Item label="Selecione a Função..." value="" color="#999" />   
-               {" "}
+          <Picker.Item
+            label="Selecione a Função..."
+            value=""
+            color={COLORS.SUB_TEXT}
+          />
+                   {" "}
           {funcoesPolicial.map((f, i) => (
             <Picker.Item key={i} label={f} value={f} />
           ))}
@@ -676,42 +791,19 @@ export default function Apreencoes({ navigation }) {
              {" "}
       </View>
            {" "}
-      {policiais.length > 0 && (
+      {policiais.length >= 1 && (
         <TouchableOpacity
           style={styles.removeButton}
           onPress={() => handleRemovePolicial(policial.id)}
         >
-                    <FontAwesome name="trash-o" size={18} color="#ff4444" />   
-                <Text style={styles.removeButtonText}>Remover Policial</Text>   
-             {" "}
+                   {" "}
+          <FontAwesome name="trash-o" size={18} color={COLORS.DANGER} />       
+            <Text style={styles.removeButtonText}>Remover Policial</Text>       {" "}
         </TouchableOpacity>
       )}
          {" "}
-    </View>
-  );
-
-  const HistoricoNarrativa = () => (
-    <View>
-           {" "}
-      <Text style={[styles.sectionTitle, { marginTop: 30 }]}>
-                2.9 Histórico / Narrativa *      {" "}
-      </Text>
-           {" "}
-      <TextInput
-        style={[
-          styles.input,
-          { height: 200, textAlignVertical: "top", marginBottom: 0 },
-        ]}
-        placeholder="Relato técnico e detalhado da ocorrência..."
-        placeholderTextColor="#999"
-        multiline
-        value={historico}
-        onChangeText={setHistorico}
-      />
-         {" "}
-    </View>
-  );
-
+    </ExpandableCard>
+  ); 
   return (
     <SafeAreaView style={styles.fullScreen}>
            {" "}
@@ -727,23 +819,33 @@ export default function Apreencoes({ navigation }) {
           showsVerticalScrollIndicator={false}
           keyboardShouldPersistTaps="handled"
         >
-                    <Text style={styles.pageTitle}>Apreensões e Relato</Text>   
-                         {" "}
+                   {" "}
+          <Text style={styles.pageTitle}>Apreensões e Finalização</Text>         
+               {" "}
           <Text style={styles.sectionTitle}>
                         2.2 Armas de Fogo ({armas.length})          {" "}
           </Text>
                    {" "}
+          {armas.length === 0 && (
+            <Text style={styles.emptyText}>Nenhuma arma cadastrada.</Text>
+          )}
+                   {" "}
           {armas.map((arma) => (
-            <ArmaDeFogoForm key={arma.id} arma={arma} />
+            <ArmaDeFogoForm
+              key={arma.id}
+              arma={arma}
+              showExpandToggle={armas.length > 1}
+            />
           ))}
                    {" "}
           <TouchableOpacity style={styles.addButton} onPress={handleAddArma}>
                        {" "}
-            <FontAwesome name="plus-circle" size={20} color="#007bff" />       
-                <Text style={styles.addButtonText}>Adicionar Outra Arma</Text> 
-                   {" "}
+            <FontAwesome name="plus-circle" size={20} color={COLORS.ACCENT} /> 
+                     {" "}
+            <Text style={styles.addButtonText}>Adicionar Arma de Fogo</Text>   
+                 {" "}
           </TouchableOpacity>
-                             {" "}
+                           {" "}
           <Text style={[styles.sectionTitle, { marginTop: 30 }]}>
                         2.3 Munições ({municoes.length})          {" "}
           </Text>
@@ -753,16 +855,20 @@ export default function Apreencoes({ navigation }) {
           )}
                    {" "}
           {municoes.map((municao) => (
-            <MunicaoForm key={municao.id} municao={municao} />
+            <MunicaoForm
+              key={municao.id}
+              municao={municao}
+              showExpandToggle={municoes.length > 1}
+            />
           ))}
                    {" "}
           <TouchableOpacity style={styles.addButton} onPress={handleAddMunicao}>
                        {" "}
-            <FontAwesome name="plus-circle" size={20} color="#007bff" />       
-                <Text style={styles.addButtonText}>Adicionar Munição</Text>     
-               {" "}
+            <FontAwesome name="plus-circle" size={20} color={COLORS.ACCENT} /> 
+                     {" "}
+            <Text style={styles.addButtonText}>Adicionar Munição</Text>         {" "}
           </TouchableOpacity>
-                             {" "}
+                          {" "}
           <Text style={[styles.sectionTitle, { marginTop: 30 }]}>
                         2.4 Drogas Apreendidas ({drogas.length})          {" "}
           </Text>
@@ -772,16 +878,20 @@ export default function Apreencoes({ navigation }) {
           )}
                    {" "}
           {drogas.map((droga) => (
-            <DrogaForm key={droga.id} droga={droga} />
+            <DrogaForm
+              key={droga.id}
+              droga={droga}
+              showExpandToggle={drogas.length > 1}
+            />
           ))}
                    {" "}
           <TouchableOpacity style={styles.addButton} onPress={handleAddDroga}>
                        {" "}
-            <FontAwesome name="plus-circle" size={20} color="#007bff" />       
-                <Text style={styles.addButtonText}>Adicionar Droga</Text>       
-             {" "}
+            <FontAwesome name="plus-circle" size={20} color={COLORS.ACCENT} /> 
+                      <Text style={styles.addButtonText}>Adicionar Droga</Text> 
+                   {" "}
           </TouchableOpacity>
-                             {" "}
+                            {" "}
           <Text style={[styles.sectionTitle, { marginTop: 30 }]}>
                         2.5 Dinheiro Apreendido ({dinheiro.length})          {" "}
           </Text>
@@ -791,7 +901,11 @@ export default function Apreencoes({ navigation }) {
           )}
                    {" "}
           {dinheiro.map((item) => (
-            <DinheiroForm key={item.id} item={item} />
+            <DinheiroForm
+              key={item.id}
+              item={item}
+              showExpandToggle={dinheiro.length > 1}
+            />
           ))}
                    {" "}
           <TouchableOpacity
@@ -799,11 +913,12 @@ export default function Apreencoes({ navigation }) {
             onPress={handleAddDinheiro}
           >
                        {" "}
-            <FontAwesome name="plus-circle" size={20} color="#007bff" />       
-                <Text style={styles.addButtonText}>Adicionar Dinheiro</Text>   
-                 {" "}
+            <FontAwesome name="plus-circle" size={20} color={COLORS.ACCENT} /> 
+                     {" "}
+            <Text style={styles.addButtonText}>Adicionar Dinheiro</Text>       
+             {" "}
           </TouchableOpacity>
-                   {" "}
+                           {" "}
           <Text style={[styles.sectionTitle, { marginTop: 30 }]}>
                         2.6 Objetos ({objetos.length})          {" "}
           </Text>
@@ -813,16 +928,20 @@ export default function Apreencoes({ navigation }) {
           )}
                    {" "}
           {objetos.map((objeto) => (
-            <ObjetoForm key={objeto.id} objeto={objeto} />
+            <ObjetoForm
+              key={objeto.id}
+              objeto={objeto}
+              showExpandToggle={objetos.length > 1}
+            />
           ))}
                    {" "}
           <TouchableOpacity style={styles.addButton} onPress={handleAddObjeto}>
                        {" "}
-            <FontAwesome name="plus-circle" size={20} color="#007bff" />       
-                <Text style={styles.addButtonText}>Adicionar Objeto</Text>     
-               {" "}
+            <FontAwesome name="plus-circle" size={20} color={COLORS.ACCENT} /> 
+                      <Text style={styles.addButtonText}>Adicionar Objeto</Text>
+                     {" "}
           </TouchableOpacity>
-                   {" "}
+                           {" "}
           <Text style={[styles.sectionTitle, { marginTop: 30 }]}>
                         2.7 Veículos ({veiculos.length})          {" "}
           </Text>
@@ -832,16 +951,20 @@ export default function Apreencoes({ navigation }) {
           )}
                    {" "}
           {veiculos.map((veiculo) => (
-            <VeiculoForm key={veiculo.id} veiculo={veiculo} />
+            <VeiculoForm
+              key={veiculo.id}
+              veiculo={veiculo}
+              showExpandToggle={veiculos.length > 1}
+            />
           ))}
                    {" "}
           <TouchableOpacity style={styles.addButton} onPress={handleAddVeiculo}>
                        {" "}
-            <FontAwesome name="plus-circle" size={20} color="#007bff" />       
-                <Text style={styles.addButtonText}>Adicionar Veículo</Text>     
-               {" "}
+            <FontAwesome name="plus-circle" size={20} color={COLORS.ACCENT} /> 
+                     {" "}
+            <Text style={styles.addButtonText}>Adicionar Veículo</Text>         {" "}
           </TouchableOpacity>
-                 {" "}
+                           {" "}
           <Text style={[styles.sectionTitle, { marginTop: 30 }]}>
                         2.8 Policiais Envolvidos ({policiais.length})          {" "}
           </Text>
@@ -851,7 +974,11 @@ export default function Apreencoes({ navigation }) {
           )}
                    {" "}
           {policiais.map((policial) => (
-            <PolicialForm key={policial.id} policial={policial} />
+            <PolicialForm
+              key={policial.id}
+              policial={policial}
+              showExpandToggle={policiais.length > 1}
+            />
           ))}
                    {" "}
           <TouchableOpacity
@@ -859,13 +986,41 @@ export default function Apreencoes({ navigation }) {
             onPress={handleAddPolicial}
           >
                        {" "}
-            <FontAwesome name="plus-circle" size={20} color="#007bff" />       
-                <Text style={styles.addButtonText}>Adicionar Policial</Text>   
-                 {" "}
+            <FontAwesome name="plus-circle" size={20} color={COLORS.ACCENT} /> 
+                     {" "}
+            <Text style={styles.addButtonText}>Adicionar Policial</Text>       
+             {" "}
           </TouchableOpacity>
-                    <HistoricoNarrativa />         {" "}
+                            {" "}
+          <Text style={[styles.sectionTitle, { marginTop: 30 }]}>
+                        3.0 Finalização          {" "}
+          </Text>
+                    <Text style={styles.label}>Token do Relatório *</Text>     
+             {" "}
+          <TextInput
+            style={[styles.input, { backgroundColor: COLORS.CARD }]}
+            editable={false}
+            placeholder={
+              tokenRelatorio ||
+              "O Token Único do Relatório será gerado ao finalizar"
+            }
+            placeholderTextColor={COLORS.SUB_TEXT}
+            value={tokenRelatorio}
+            autoCapitalize="characters"
+          />
+                   {" "}
           <TouchableOpacity style={styles.nextButton} onPress={handleNext}>
-                        <Text style={styles.nextButtonText}>Próxima Etapa</Text>
+                       {" "}
+            <Text style={styles.nextButtonText}>
+                            Finalizar e Gerar Relatório            {" "}
+            </Text>
+                       {" "}
+            <FontAwesome
+              name="chevron-right"
+              size={16}
+              color={COLORS.BACKGROUND}
+              style={{ marginLeft: 10 }}
+            />
                      {" "}
           </TouchableOpacity>
                  {" "}
@@ -876,147 +1031,164 @@ export default function Apreencoes({ navigation }) {
     </SafeAreaView>
   );
 }
+
 const styles = StyleSheet.create({
   fullScreen: {
     flex: 1,
-    backgroundColor: "#000",
+    backgroundColor: COLORS.BACKGROUND,
   },
   scroll: {
     flex: 1,
-    paddingHorizontal: 20,
   },
   contentContainer: {
-    paddingTop: 20,
-    paddingBottom: 50,
+    padding: 20,
+    paddingBottom: 120, 
   },
   pageTitle: {
-    color: "#fff",
-    fontSize: 26,
+    fontSize: 24,
     fontWeight: "bold",
-    marginBottom: 5,
+    color: COLORS.PRIMARY,
+    marginBottom: 20,
+    borderBottomWidth: 2,
+    borderBottomColor: COLORS.BORDER,
+    paddingBottom: 10,
   },
   sectionTitle: {
-    color: "#fff",
-    fontSize: 20,
+    fontSize: 18,
     fontWeight: "bold",
+    color: COLORS.TEXT,
     marginBottom: 15,
-    borderBottomWidth: 1,
-    borderBottomColor: "#222",
-    paddingBottom: 8,
-    marginTop: 15,
+    marginTop: 10,
   },
   itemCard: {
-    backgroundColor: "#111",
-    borderRadius: 10,
+    backgroundColor: COLORS.CARD,
     padding: 15,
+    borderRadius: 10,
     marginBottom: 15,
     borderWidth: 1,
-    borderColor: "#333",
+    borderColor: COLORS.BORDER,
+  },
+  itemCardHeader: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
   },
   itemTitle: {
-    color: "#007bff",
     fontSize: 16,
     fontWeight: "bold",
-    marginBottom: 10,
+    color: COLORS.TEXT,
+    flexShrink: 1,
+  },
+  itemCardContent: {
+    marginTop: 15,
+    paddingTop: 15,
+    borderTopWidth: 1,
+    borderTopColor: COLORS.BORDER,
   },
   label: {
-    color: "#fff",
-    marginBottom: 5,
-    fontWeight: "bold",
     fontSize: 14,
+    fontWeight: "600",
+    color: COLORS.TEXT,
+    marginTop: 10,
+    marginBottom: 5,
   },
   input: {
-    backgroundColor: "#111",
-    color: "#fff",
-    borderRadius: 8,
-    padding: 10,
-    marginBottom: 15,
+    height: 45,
     borderWidth: 1,
-    borderColor: "#222",
+    borderColor: COLORS.BORDER,
+    borderRadius: 8,
+    paddingHorizontal: 15,
+    backgroundColor: COLORS.BACKGROUND,
     fontSize: 16,
+    color: COLORS.TEXT,
+  },
+  pickerContainer: {
+    borderWidth: 1,
+    borderColor: COLORS.BORDER,
+    borderRadius: 8,
+    backgroundColor: COLORS.BACKGROUND,
+    overflow: "hidden",
+    height: 45,
+    justifyContent: "center",
+  },
+  pickerBase: {
+    color: COLORS.TEXT,
   },
   inlineGroup: {
     flexDirection: "row",
     justifyContent: "space-between",
-    marginBottom: 5,
-    gap: 10,
+    marginTop: 5,
   },
   inputContainerHalf: {
-    flex: 1,
+    width: "48%",
   },
   inputInline: {
-    backgroundColor: "#111",
-    color: "#fff",
-    borderRadius: 8,
-    padding: 10,
-    marginBottom: 15,
-    borderWidth: 1,
-    borderColor: "#222",
-    fontSize: 16,
-  },
-  pickerContainer: {
-    backgroundColor: "#111",
-    borderRadius: 8,
-    marginBottom: 15,
     height: 45,
-    justifyContent: "center",
     borderWidth: 1,
-    borderColor: "#222",
+    borderColor: COLORS.BORDER,
+    borderRadius: 8,
+    paddingHorizontal: 15,
+    backgroundColor: COLORS.BACKGROUND,
+    fontSize: 16,
+    color: COLORS.TEXT,
   },
   pickerContainerInline: {
-    marginBottom: 15,
-  },
-  pickerBase: {
-    color: "#fff",
-    fontSize: 16,
-    backgroundColor: "#111",
-    marginHorizontal: Platform.OS === "android" ? -5 : 0,
+    height: 45,
   },
   addButton: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
     padding: 10,
-    borderRadius: 8,
-    backgroundColor: "#1e1e1e",
+    marginVertical: 5,
+    borderStyle: "dashed",
     borderWidth: 1,
-    borderColor: "#007bff50",
-    marginBottom: 20,
+    borderColor: COLORS.ACCENT,
+    borderRadius: 8,
+    backgroundColor: "#E3F2FD",
   },
   addButtonText: {
-    color: "#007bff",
     marginLeft: 10,
+    color: COLORS.ACCENT,
     fontWeight: "bold",
+    fontSize: 16,
   },
   removeButton: {
     flexDirection: "row",
     alignItems: "center",
-    justifyContent: "flex-start",
-    paddingTop: 10,
-    marginTop: 5,
+    justifyContent: "center",
+    padding: 8,
+    marginTop: 15,
+    borderStyle: "dashed",
+    borderWidth: 1,
+    borderColor: COLORS.DANGER,
+    borderRadius: 8,
+    backgroundColor: "#FFEBEE",
   },
   removeButtonText: {
-    color: "#ff4444",
-    marginLeft: 8,
+    marginLeft: 10,
+    color: COLORS.DANGER,
+    fontWeight: "bold",
     fontSize: 14,
-    fontWeight: "500",
   },
   emptyText: {
-    color: "#888",
-    textAlign: "center",
-    marginBottom: 20,
-    fontSize: 16,
+    color: COLORS.SUB_TEXT,
+    fontStyle: "italic",
+    paddingVertical: 10,
+    paddingLeft: 5,
   },
   nextButton: {
-    backgroundColor: "#007bff",
+    flexDirection: "row",
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: COLORS.PRIMARY,
     padding: 15,
     borderRadius: 8,
-    alignItems: "center",
-    marginTop: 2,
-    marginBottom: 20,
+    width: "100%",
+    marginTop: 30,
   },
   nextButtonText: {
-    color: "#fff",
+    color: COLORS.BACKGROUND,
     fontSize: 16,
     fontWeight: "bold",
   },
